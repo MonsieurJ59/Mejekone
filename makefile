@@ -40,13 +40,13 @@ logs-frontend:
 logs-mysql:
 	docker-compose logs -f mysql
 
-# Exécuter les fixtures
-fixtures:
-	docker-compose exec backend npm run seed
+logs-phpmyadmin:
+	docker-compose logs -f phpmyadmin
 
-# Analyser un tournoi terminé
-analyze-end-tournament:
-	docker-compose exec backend npx ts-node src/scripts/analyze-tournament.ts
+# Réinitialiser la base de données
+db-reset:
+	docker-compose down -v mysql
+	docker-compose up -d mysql
 
 # Entrer dans le conteneur backend
 shell-backend:
@@ -65,35 +65,43 @@ clean:
 	docker system prune -f
 	docker volume prune -f
 
+# 🎵 Commandes spécifiques à Méjekoné
+.PHONY: import-songs create-playlist
 
-# 🧪 Tests du backend
-.PHONY: test-backend test-backend-watch test-backend-e2e test-backend-unit
+# Importer des chansons (à implémenter)
+import-songs:
+	@echo "Fonctionnalité à implémenter"
+
+# Créer une playlist (à implémenter)
+create-playlist:
+	@echo "Fonctionnalité à implémenter"
+
+# 🧪 Tests du backend (Spring Boot)
+.PHONY: test-backend test-backend-unit test-backend-integration
 
 # Exécuter tous les tests du backend
 test-backend:
-	docker-compose exec backend sh -c "cd /app && npm install ts-jest && npm test"
-
-# Exécuter les tests en mode watch
-test-backend-watch:
-	docker-compose exec backend sh -c "cd /app && npm install ts-jest && npm run test:watch"
-
-# Exécuter uniquement les tests end-to-end
-test-backend-e2e:
-	docker-compose exec backend sh -c "cd /app && npm install ts-jest && npm run test:e2e"
-
-# Exécuter uniquement les tests e2e stables
-test-backend-e2e-stable:
-	docker-compose exec backend sh -c "cd /app && npm install ts-jest && npm run test:e2e:stable"
-
-# Exécuter les tests e2e en développement (sans les tests de flux complet)
-test-backend-e2e-dev:
-	docker-compose exec backend sh -c "cd /app && npm install ts-jest && npm run test:e2e:dev"
+	docker-compose exec backend ./mvnw test
 
 # Exécuter uniquement les tests unitaires
 test-backend-unit:
-	docker-compose exec backend sh -c "cd /app && npm install ts-jest && npm run test:unit"
+	docker-compose exec backend ./mvnw test -Dtest=*Test
 
-# Exécuter un test spécifique
-test-backend-file:
-	@read -p "Entrez le chemin du fichier de test (ex: tests/e2e/tournament-flow.test.ts): " file_path; \
-	docker-compose exec backend sh -c "cd /app && npm install ts-jest && npx jest $$file_path"
+# Exécuter uniquement les tests d'intégration
+test-backend-integration:
+	docker-compose exec backend ./mvnw test -Dtest=*IT
+
+# 🖥️ Commandes frontend (React)
+.PHONY: lint-frontend format-frontend build-frontend
+
+# Linter le frontend
+lint-frontend:
+	docker-compose exec frontend npm run lint
+
+# Formater le code frontend
+format-frontend:
+	docker-compose exec frontend npm run format
+
+# Build le frontend pour la production
+build-frontend:
+	docker-compose exec frontend npm run build
