@@ -7,7 +7,7 @@ start:
 
 # Démarrer avec rebuild (seulement quand nécessaire)
 rebuild:
-	docker-compose up -d --build
+	docker-compose down & docker-compose up -d --build
 
 # Démarrage rapide (sans détacher)
 dev:
